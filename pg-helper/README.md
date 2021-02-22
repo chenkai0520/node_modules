@@ -90,6 +90,7 @@ const result = await pgHelper.select({
   schemaName: 'public',
   tableName: 'jobs',
   autoHump: false,
+  count: true,
 });
 ```
 

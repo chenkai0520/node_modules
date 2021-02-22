@@ -158,13 +158,21 @@ class PgHelper {
   }
 
   async select(params, options){
-    const { tableName, include, where, order, limit, offset } = options;
+    const { tableName, include, where, order, limit, offset, count } = options;
     const schemaName = 'schemaName' in options ? options.schemaName : 'public';
 
     const sql = `SELECT ${includeSql(include)}
     FROM ${schemaName}."${tableName}"
     ${whereSql(where)} ${orderSql(order)} ${limitOffsetSql({limit, offset})} `;
-    return this.runSql(sql, params, options);
+    const result = await this.runSql(sql, params, options);
+    
+    if(count){
+      const countRes = await this.runSql(`SELECT count(*) as count
+        FROM ${schemaName}."${tableName}"
+        ${whereSql(where)}`, params, options);
+      result.count = parseInt(countRes.rows[0].count);
+    }
+    return result;
   }
 
   static sqlUtils(){
