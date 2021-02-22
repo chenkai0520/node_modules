@@ -52,4 +52,48 @@ const pgHelper = new PgHelper({
   } catch (error) {
     transaction.rollback();
   }
+
+  await pgHelper.delete({}, {
+    tableName: 'jobs',
+    returning: true,
+  });
+
+  await pgHelper.insert([{
+    percentage: 0,
+    type: 'public',
+    params: {},
+    created_by: 1,
+    status: 'created',
+    job_uuid: '105',
+  },{
+    percentage: 0,
+    type: 'public',
+    params: {},
+    created_by: 1,
+    status: 'created',
+    job_uuid: '106',
+  }], {
+    tableName: 'jobs',
+    returning: true,
+  });
+    
+
+  await pgHelper.update({
+    type: 'pravate',
+    status: 'gg',
+  }, {
+    update: ['type', 'status'],
+    tableName: 'jobs',
+    returning: ['id'],
+  });
+
+  await pgHelper.select({
+    percentage: 0,
+  }, {
+    where: {
+      percentage: ' = {percentage}'
+    },
+    tableName: 'jobs',
+    autoHump: false,
+  });
 })();

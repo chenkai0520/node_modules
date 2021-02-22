@@ -24,10 +24,72 @@ const pgHelper = new PgHelper({
 
 ```js
 await pgHelper.runSql('select now()');
+```
 
-// with params
+## with params
+```js
 await pgHelper.runSql('select power({a}, {b})', { a: 2, b: 4 });
 ```
+
+## insert
+
+```js
+const result = await pgHelper.insert([{
+  percentage: 0,
+  type: 'public',
+  params: {},
+  created_by: 1,
+  status: 'created',
+  job_uuid: '103',
+},{
+  percentage: 0,
+  type: 'public',
+  params: {},
+  created_by: 1,
+  status: 'created',
+  job_uuid: '104',
+}], {
+  tableName: 'jobs',
+  returning: true,
+});
+```
+
+## delete
+
+```js
+const result = await pgHelper.delete({}, {
+  tableName: 'jobs',
+  transaction,
+});
+```
+## update
+
+```js
+const result = await pgHelper.update({
+  type: 'pravate',
+  status: 'gg',
+}, {
+  update: ['type', 'status'],
+  tableName: 'jobs',
+  returning: ['id'],
+  transaction,
+});
+```
+## select
+
+```js
+const result = await pgHelper.select({
+  percentage: 0,
+}, {
+  where: {
+    percentage: ' = {percentage}'
+  },
+  schemaName: 'public',
+  tableName: 'jobs',
+  autoHump: false,
+});
+```
+
 
 ## Examples Run transaction sql
 
