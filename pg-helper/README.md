@@ -82,7 +82,10 @@ const result = await pgHelper.select({
   percentage: 0,
 }, {
   where: {
-    percentage: ' = {percentage}'
+    percentage: '= {percentage}'
+    or: {
+      id: '=1',
+    }
   },
   schemaName: 'public',
   tableName: 'jobs',
