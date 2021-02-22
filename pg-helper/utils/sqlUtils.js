@@ -68,8 +68,10 @@ function orderSql(orders = []) {
   }).join(',');
 }
 
-function getWhereSql(where) {
+function getWhereSql(where, options) {
   if(!where) return '';
+  const type = options.type || 'and';
+  const autoHump = options.autoHump;
 
   const fields = Object.keys(where).filter((field) => {
     return ['and', 'or'].indexOf(field) === -1;
@@ -78,19 +80,33 @@ function getWhereSql(where) {
   let sql = ` ( `;
   if(fields.length > 0) {
     const firstField = fields[0];
-    sql += `${firstField} ${where[firstField]}`;
 
-    fields.shift();
-    fields.forEach((field)=>{
-      sql += ` and ${field} ${where[field]} `;
-    });
+    if(autoHump) {
+      sql += `${hump2underline(firstField)} ${where[firstField]}`;
+      fields.shift();
+      fields.forEach((field)=>{
+        sql += ` ${type} ${hump2underline(field)} ${where[field]} `;
+      });
+    } else {
+      sql += `${firstField} ${where[firstField]}`;
+      fields.shift();
+      fields.forEach((field)=>{
+        sql += ` ${type} ${field} ${where[field]} `;
+      });
+    }
   }
   
   if('and' in where) {
-    sql += ` and ${getWhereSql(where.and)} `;
+    sql += ` and ${getWhereSql(where.and, {
+      autoHump,
+      type: 'and',
+    })} `;
   }
   if('or' in where) {
-    sql += ` or ${getWhereSql(where.or)} `;
+    sql += ` or ${getWhereSql(where.or, {
+      autoHump,
+      type: 'or',
+    })} `;
   }
 
   sql += ' ) ';
@@ -142,13 +158,14 @@ function insertSql(params, options) {
   let fieldsSql = ' ( ';
   let valuesSql = ' VALUES ';
   const data = [];
+  const autoHump = options.autoHump;
   if (!Array.isArray(params)) {
     params = [params];
   }
 
   const fields = Object.keys(params[0]);
 
-  if(options.autoHump) {
+  if(autoHump) {
     fieldsSql += fields.map((field) => objHump2underline(field)).join(',');
   } else {
     fieldsSql += fields.join(',');
