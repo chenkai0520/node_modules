@@ -175,10 +175,6 @@ class PgHelper {
     return result;
   }
 
-  static sqlUtils(){
-    return sqlUtils;
-  }
-
 }
 
 module.exports = {
