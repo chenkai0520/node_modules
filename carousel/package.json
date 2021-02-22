@@ -1,0 +1,16 @@
+{
+  "name": "@c_kai/carousel",
+  "version": "1.0.1",
+  "description": "swiper",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "swiper",
+    "carousel"
+  ],
+  "author": "chenkai",
+  "license": "ISC",
+  "repository": "https://github.com/chenkai0520/node_modules/tree/master/carousel"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@c_kai/scheduler",
+  "version": "2.0.0",
+  "description": "Execute asynchronous functions in order and limit the number of simultaneous executions。按顺序执行异步函数，并限制同时执行的数量",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "scheduler",
+    "async"
+  ],
+  "author": "陈锴",
+  "license": "ISC",
+  "repository": "https://github.com/chenkai0520/node_modules/tree/master/scheduler"
+}

@@ -1,0 +1,47 @@
+.swiper-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.swiper-container .swiper-list-container {
+    width: 100%;
+    height: 100%;
+}
+
+.swiper-container .swiper-item {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    opacity: 0;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+
+.swiper-container .swiper-item-active {
+    opacity: 1;
+}
+
+.swiper-container .swiper-option-container {
+    width: 100%;
+    position: absolute;
+    bottom: 0px;
+    text-align: center;
+}
+
+.swiper-container .swiper-option-container .swiper-option {
+    width: 100%;
+    border-radius: 50%;
+    width: 8px;
+    height: 8px;
+    background-color: gray;
+    border: 3px solid white;
+    display: inline-block;
+    cursor: pointer;
+    margin: 2px;
+}
+
+.swiper-container .swiper-option-container .swiper-option-active {
+    background-color: blue;
+}

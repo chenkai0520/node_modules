@@ -1,0 +1,12 @@
+{
+  "name": "@c_kai/pg-helper",
+  "version": "1.0.2",
+  "description": "pg helper utils",
+  "main": "index.js",
+  "repository": "https://github.com/chenkai0520/node_modules/pg-helper",
+  "author": "chenkai0520",
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^8.5.1"
+  }
+}
