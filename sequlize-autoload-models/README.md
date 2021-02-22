@@ -2,15 +2,32 @@
 sequlize-autoload-models
 
 # example
+models
+
+```
+./models
+├── data.js
+├── table
+│   ├── table1.js
+│   └── table2.js
+└── user.js
+```
+
 ```javascript
+const path = require('path');
 const { Sequelize } = require('sequelize');
 const autoloadModels = require('@c_kai/sequlize-autoload-models');
 
 
 let sequelize = new Sequelize('postgres://postgres:postgres@localhost:5432/dbname');
-sequelize = autoloadModels( sequelize, './models');
+sequelize = autoloadModels( sequelize, path.join(__dirname, './models'));
 
 console.log(sequelize.models);
+//{ data: data, table1: table1, table2: table2, user: user }
+
+//now you can make the standard CRUD queries
+console.log(sequelize.models.table1.create;
+// detail: https://sequelize.org/master/manual/model-querying-basics.html
 ```
 
 
