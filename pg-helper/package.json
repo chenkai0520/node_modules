@@ -1,6 +1,6 @@
 {
   "name": "@c_kai/pg-helper",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "pg helper utils",
   "main": "index.js",
   "repository": "https://github.com/chenkai0520/node_modules/tree/main/pg-helper",

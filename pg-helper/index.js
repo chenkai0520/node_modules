@@ -3,7 +3,7 @@ const sqlUtils = require('./utils/sqlUtils');
 
 const { Pool, Client } = pg;
 const {
-  sqlTemplate, rowsUnderline2hump, whereSql, orderSql, limitOffsetSql, updateSql, insertSql, includeSql, returningSql
+  sqlTemplate, objHump2underline, rowsUnderline2hump, whereSql, orderSql, limitOffsetSql, updateSql, insertSql, includeSql, returningSql
 } = sqlUtils;
 
 class MyClient extends Client {
@@ -12,6 +12,10 @@ class MyClient extends Client {
 
     let result;
     if(!Array.isArray(obj)){
+      const autoHump = 'autoHump' in options ? options.autoHump : this.autoHump;
+      if(autoHump) {
+        obj = objHump2underline(obj);
+      }
       const { sql, values } = sqlTemplate(sqlTem, obj);
       result = await pgClient.query(sql, values);
     } else {
@@ -40,6 +44,7 @@ class PgHelper {
     pooConfig.Client = MyClient;
     this.pooConfig = pooConfig;
     this.autoHump = options.autoHump;
+    this.returning = options.returning;
     this.logger = options.logger || console;
 
     this.initPool();
@@ -119,26 +124,33 @@ class PgHelper {
   }
 
   async insert(params, options){
-    const pgClient = options.transaction || await this.getClient();
-    let { tableName, schemaName, returning } = options;
-    schemaName = schemaName || 'public';
+    const { tableName } = options;
+    const schemaName = 'schemaName' in options ? options.schemaName : 'public';
+    const returning = 'returning' in options ? options.returning : this.returning;
+    const autoHump = 'autoHump' in options ? options.autoHump : this.autoHump;
 
-    const { sql: _sql, data} = insertSql(params);
+    const { sql: _sql, data} = insertSql(params, {
+      autoHump,
+    });
     const sql = `INSERT INTO ${schemaName}."${tableName}" ${_sql} ${returningSql(returning)}`;
     return this.runSql(sql, data , options);
   }
 
   async delete(params, options){
-    let { tableName, schemaName, where, returning } = options;
-    schemaName = schemaName || 'public';
+    const { tableName, where } = options;
+    const schemaName = 'schemaName' in options ? options.schemaName : 'public';
+    const returning = 'returning' in options ? options.returning : this.returning;
+
     const sql = `DELETE FROM ${schemaName}."${tableName}"
     ${whereSql(where)} ${returningSql(returning)}`;
     return this.runSql(sql, params , options);
   }
 
   async update(params, options){
-    let { update, tableName, schemaName, where, returning } = options;
-    schemaName = schemaName || 'public';
+    const { update, tableName, where } = options;
+    const schemaName = 'schemaName' in options ? options.schemaName : 'public';
+    const returning = 'returning' in options ? options.returning : this.returning;
+
     const sql = `UPDATE ${schemaName}."${tableName}"
     SET ${updateSql(update)}
     ${whereSql(where)} ${returningSql(returning)}`
@@ -146,14 +158,22 @@ class PgHelper {
   }
 
   async select(params, options){
-    let { tableName, schemaName, include, where, order, limit, offset } = options;
-    schemaName = schemaName || 'public';
+    const { tableName, include, where, order, limit, offset } = options;
+    const schemaName = 'schemaName' in options ? options.schemaName : 'public';
+
     const sql = `SELECT ${includeSql(include)}
     FROM ${schemaName}."${tableName}"
     ${whereSql(where)} ${orderSql(order)} ${limitOffsetSql({limit, offset})} `;
     return this.runSql(sql, params, options);
   }
 
+  static sqlUtils(){
+    return sqlUtils;
+  }
+
 }
 
-module.exports = PgHelper;
+module.exports = {
+  PgHelper,
+  sqlUtils,
+};

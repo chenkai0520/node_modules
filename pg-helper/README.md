@@ -5,7 +5,7 @@ use node-postgres easier
 # Examples
 
 ```js
-const PgHelper = require('@c_kai/pg-helper');
+const {PgHelper} = require('@c_kai/pg-helper');
 
 // detail https://node-postgres.com/api/pool
 const pgHelper = new PgHelper({

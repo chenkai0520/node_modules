@@ -1,4 +1,4 @@
-const PgHelper = require('../index');
+const { PgHelper } = require('../index');
 
 
 // detail https://node-postgres.com/api/pool

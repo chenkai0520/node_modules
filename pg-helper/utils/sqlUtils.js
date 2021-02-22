@@ -32,6 +32,19 @@ function underline2hump(str) {
   return str.replace(/_([a-z])/g, (match, p1) => p1.toUpperCase());
 }
 
+function hump2underline(str) {
+  return str.replace(/([A-Z])/g, (match, p1) => `_${p1.toLowerCase()}`);
+}
+
+function objHump2underline(obj) {
+  const formatObj = {};
+  Object.keys(obj).forEach((key)=>{
+    formatObj[hump2underline(key)] = obj[key];
+  })
+  return formatObj;
+}
+
+
 function rowsUnderline2hump(rows) {
   if (!Array.isArray(rows) || rows.length === 0) return [];
   return rows.map((obj) => {
@@ -125,7 +138,7 @@ function fieldsSql(params) {
   return params.join(',');
 }
 
-function insertSql(params) {
+function insertSql(params, options) {
   let fieldsSql = ' ( ';
   let valuesSql = ' VALUES ';
   const data = [];
@@ -134,7 +147,12 @@ function insertSql(params) {
   }
 
   const fields = Object.keys(params[0]);
-  fieldsSql += fields.join(',');
+
+  if(options.autoHump) {
+    fieldsSql += fields.map((field) => objHump2underline(field)).join(',');
+  } else {
+    fieldsSql += fields.join(',');
+  }
   fieldsSql +=')';
 
   const fieldCount = fields.length;
@@ -165,6 +183,7 @@ function returningSql(returning) {
 module.exports = {
   sqlTemplate,
   rowsUnderline2hump,
+  objHump2underline,
   orderSql,
   whereSql,
   limitOffsetSql,
