@@ -2,7 +2,7 @@
 node_modules
 
 
-# 发现npm在全局变为淘宝的镜像源后，登录和发布
+# commons
 ```
 <!-- 登陆 -->
 npm login --registry http://registry.npmjs.org
@@ -10,6 +10,6 @@ npm login --registry http://registry.npmjs.org
 <!-- 推送 -->
 npm publish --registry http://registry.npmjs.org --access=public
 
-<!-- unpublish -->
+<!--24h unpublish -->
 npm unpublish pkgname --force
 ```

@@ -1,11 +1,20 @@
 {
   "name": "@c_kai/pg-helper",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "pg helper utils",
   "main": "index.js",
-  "repository": "https://github.com/chenkai0520/node_modules/pg-helper",
+  "repository": "https://github.com/chenkai0520/node_modules/tree/main/pg-helper",
   "author": "chenkai0520",
   "license": "MIT",
+  "keywords": [
+    "database",
+    "pg-utils",
+    "pg-helper",
+    "pg",
+    "postgre",
+    "postgres",
+    "postgresql"
+  ],
   "dependencies": {
     "pg": "^8.5.1"
   }
