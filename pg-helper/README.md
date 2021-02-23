@@ -84,7 +84,7 @@ Function
 
 #### params
 
-+ params `Array<Object>` - 插入表的数据，其中`Object`的key需要和字段一一对应
++ params `Object` - 模版参数，其中`Object`的key需要和SQL模版中`{key}`值一一对应
 
 + options
 
@@ -121,7 +121,7 @@ Function
 
 #### params
 
-+ params `Array<Object>` - 插入表的数据，其中`Object`的key需要和字段一一对应
++ params `Object` - 模版参数，其中`Object`的key需要和SQL模版中`{key}`值一一对应
 
 + options
 
@@ -148,7 +148,7 @@ Function
 
     
 
-  + options. update`Array|Object` - 构建update sql 
+  + options. update`Array|Object` - 需要更新的字段
 
     ```js
     ['name', 'type']
@@ -179,7 +179,7 @@ Function
 
 #### params
 
-+ params `Array<Object>` - 插入表的数据，其中`Object`的key需要和字段一一对应
++ params `Object` - 模版参数，其中`Object`的key需要和SQL模版中`{key}`值一一对应
 
 + options
 
@@ -234,7 +234,7 @@ Function
 
 + sqlTem `String`- 执行的sql
 
-+ obj `Object` - key和执行sql中有模版参数需要一一对应
++ obj `Object` - 模版参数，其中`Object`的key需要和SQL模版中`{key}`值一一对应
 
 + options `Object` 
 
