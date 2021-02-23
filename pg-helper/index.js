@@ -1,5 +1,5 @@
 const pg = require('pg');
-const sqlUtils = require('./sqlUtils');
+const sqlUtils = require('./utils/sqlUtils');
 
 const { Pool, Client } = pg;
 const {
