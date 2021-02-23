@@ -5,6 +5,11 @@ A small helper for node-postgres to help you with building your queries.
 
 [node-postgres](https://node-postgres.com/) 使用序数参数查询`($1, $2, etc)`, 因此变量需要有明确的顺序，一旦参数过多使用起来就异常麻烦，该模块使你更容易、更快速、更安全的构建SQL。
 
+# Install
+
+```shell
+  yarn add @c_kai/pg-helper
+```
 ## Featrues
 
 + 你可以使用`pgHelper.runSql` 函数
