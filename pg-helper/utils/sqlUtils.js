@@ -131,7 +131,13 @@ function includeSql(params) {
 
 function updateSql(params = {}) {
   if (Array.isArray(params)) {
-    return params.map((field) => `${field}={${field}}`).join(',');
+    return params.map((field) => {
+      if (typeof field === 'object' && field.value) {
+        const fieldValue = typeof field.value === 'string' ? field.value : field.value[symbolLiteral];
+        return `${field.field} = ${fieldValue}`;
+      }
+      return `${field}={${field}}`;
+    }).join(',');
   }
   const fields = Object.keys(params);
   return fields.filter((field) => params[field] !== undefined)

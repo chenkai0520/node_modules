@@ -1,6 +1,360 @@
 # pg-helper
 
-use node-postgres easier
+A small helper for node-postgres to help you with building your queries.
+
+
+[node-postgres](https://node-postgres.com/) 使用序数参数查询`($1, $2, etc)`, 因此变量需要有明确的顺序，一旦参数过多使用起来就异常麻烦，该模块使你更容易、更快速、更安全的构建SQL。
+
+## Featrues
+
++ 你可以使用`pgHelper.runSql` 函数
+
+```js
+pgHelper.runSql('SELECT * FROM table WHERE field1 = {field1} AND field2 = {field2}', {field1, field2});
+
+//当然你仍然可以使用
+pgHelper.runSql('SELECT * FROM table WHERE field1 = $1 AND field2 = $2', [field1, field2]);
+```
+
++ 该模块还提供了`select`、`update`、`delete`、`insert` 等函数方便对单表进行CURD；
+
++ 该模块封装了对事务的操作
+
+```js
+await pgHelper.runTSql([
+    {
+        sql: 'select now()',
+    },
+    {
+        sql: 'select power({a}, {b})',
+        params: { a: 2, b: 4}
+    }
+]);
+
+//OR
+
+let transaction;
+try {
+  transaction = await pgHelper.getTransaction();
+  await pgHelper.runSql('select now()', {
+    transaction,
+  });
+  await pgHelper.runSql('select power({a}, {b})', { a: 2, b: 4}, {
+    transaction,
+  });
+  transaction.commit();
+
+} catch (error) {
+  transaction.rollback();
+}
+```
+
+
+
+# API
+
+`PgHelper` Class
+
+### new PgHelper(config, options)
++ config
+same as [pg.Pool](https://node-postgres.com/api/pool)
++ options
+  + options.autoHump `Boolean` - 如果`autoHump`为true返回字段的名称会格式化为驼峰
+  + options.returning `Boolean` - 如果`returning`为true返回结果会包含更新、插入、修改的数据
+  + options.logger `Object` - 替换默认的日志需要包含`info`、`error`两个函数
+### pgHelper.insert(params, options)
+
+Function
+
+#### params
+
++ params `Array<Object>` - 插入表的数据，其中`Object`的key需要和字段一一对应
++ options
+  + options.tableName`String`- 表名称
+  + options.schemaName`String`- 表名称;default: `public`
+  + options.returning `Boolean｜Array` - 如果`returning`为true,返回结果会包含插入的数据，为数组时返回数组包含的字段
+
+#### return
+
+same as [pg.queries](https://node-postgres.com/features/queries)
+
+### pgHelper.delete(params, options)
+
+Function
+
+#### params
+
++ params `Array<Object>` - 插入表的数据，其中`Object`的key需要和字段一一对应
+
++ options
+
+  + options.tableName`String`- 表名称
+
+  + options.schemaName`String`- 表名称;default: `public`
+
+  + options.returning `Boolean｜Array` - 如果`returning`为true,返回结果会包含删除的数据，为数组时返回数组包含的字段
+
+  + options.where`Object`  构建where sql 
+
+    ```js
+    {
+    	id: '>10',
+    	type: '={type}',
+    	or:{
+    		id:'= any({ids})'
+    	}
+    }
+    
+    // sql
+    //where (id > 0 and type={type} or (id = any({ids} ) )
+    ```
+
+    
+
+#### return
+
+same as  [pg.queries](https://node-postgres.com/features/queries)
+
+### pgHelper.update(params, options)
+
+Function
+
+#### params
+
++ params `Array<Object>` - 插入表的数据，其中`Object`的key需要和字段一一对应
+
++ options
+
+  + options.tableName`String`- 表名称
+
+  + options.schemaName`String`- 表名称;default: `public`
+
+  + options.returning `Boolean｜Array` - 如果`returning`为true,返回结果会包含更新的数据，为数组时返回数组包含的字段
+
+  + options.where`Object`  构建where sql 
+
+    ```js
+    {
+    	id: '>10',
+    	type: '={type}',
+    	or:{
+    		id:'= any({ids})'
+    	}
+    }
+    
+    // sql
+    //where (id > 0 and type={type} or (id = any({ids} ) )
+    ```
+
+    
+
+  + options. update`Array|Object` - 构建update sql 
+
+    ```js
+    ['name', 'type']
+    // name = {name},type={type}
+    
+    OR
+    {
+    	name: 'name',
+    	type: 'myType',
+    }
+    name = {name},type={myType}
+    
+    ```
+
+    
+
+#### return
+
+same as  [pg.queries](https://node-postgres.com/features/queries)
+
+
+
+### pgHelper.select(params, options)
+
+
+
+Function
+
+#### params
+
++ params `Array<Object>` - 插入表的数据，其中`Object`的key需要和字段一一对应
+
++ options
+
+  + options.tableName`String`- 表名称
+
+  + options.schemaName`String`- 表名称;default: `public`
+
+  + options.where`Object`  构建where sql 
+
+    ```js
+    {
+    	id: '>10',
+    	type: '={type}',
+    	or:{
+    		id:'= any({ids})'
+    	}
+    }
+    
+    // sql
+    //where (id > 0 and type={type} or (id = any({ids} ) )
+    ```
+
+  + options.limit `int` - limit number
+
+  + options.offset `int` -offset number
+
+  + options.count `Boolean` -是否返回查询的行数
+
+  + options.include `array` - 返回的字段数组default`*`
+
+  + options.order `array` 构建ordersql
+
+    ```js
+    ['id', ['type', 'desc'], [''name'', 'asc']]
+    
+    // order by id, type desc, name asc
+    ```
+
+    
+
+#### return
+
+same as  [pg.queries](https://node-postgres.com/features/queries)
+
+
+
+### pgHelper.runSql(sqlTem, obj, options)
+
+Function
+
+#### params
+
++ sqlTem `String`- 执行的sql
+
++ obj `Object` - key和执行sql中有模版参数需要一一对应
+
++ options `Object` 
+
+  + options.autoHump `Boolean` - 如果`autoHump`为true返回字段的名称会格式化为驼峰
+
+  + options.returning `Boolean` - 如果`returning`为true返回结果会包含更新、插入、修改的数据
+
+  + options.transaction `Client` - `pgHelper.getTransaction()` 返回值
+
+    ```js
+    let transaction;
+    try {
+      transaction = await pgHelper.getTransaction();
+      await pgHelper.runSql('select now()', {
+        transaction,
+      });
+      await pgHelper.runSql('select power({a}, {b})', { a: 2, b: 4}, {
+        transaction,
+      });
+      transaction.commit();
+    
+    } catch (error) {
+      transaction.rollback();
+    }
+    ```
+
+#### return
+
+same as [pg.queries](https://node-postgres.com/features/queries)
+
+### pgHelper.getTransaction()
+
+Function
+
+Get a transaction Client
+
+### pgHelper.runTSql(sqlTemps)
+
+Function
+
+#### params
+
++ sqlTemps `Array<object>`
+
+  ```js
+  [
+    {
+      sql: 'select power({a}, {b})',
+      params: { a: 2, b: 4}
+    },
+    {
+      sql: 'any sql',
+      params: '<any params>'
+    }
+  ]
+  ```
+
+#### return
+
+same as [pg.queries](https://node-postgres.com/features/queries)
+
+### pgHelper.commit()
+
+Function
+
+commit a transaction
+
+### pgHelper.rollback()
+
+Function
+
+rollback a transaction
+
+## sqlUtils
+
+sqlUtils
+
+### sqlUtils.literalSql(str)
+
+#### params 
+
++ str `String` - 对应某些特殊SQL很有用 ，返回的sql不回在被模版转义,如
+
+  ```js
+  await model.jobs.update({
+  	percentage,
+  	status: 'progress',
+  }, {
+  	update: [{
+  		field: 'percentage',
+  		value: `(
+          CASE WHEN percentage < {percentage} 
+          THEN  {percentage}
+          ELSE percentage END)`,
+  	}, 'status'],
+  	where: {
+  	id: '={id}'
+  },
+  });
+  
+  //OR
+  
+  await model.jobs.update({
+  	percentage,
+  	status: 'progress',
+  }, {
+  	update: {
+  		status: 'status',
+  		percentage: sqlUtils.literalSql(`(
+          CASE WHEN percentage < {percentage} 
+          THEN  {percentage}
+          ELSE percentage END)`),
+  	},
+  	where: {
+  	id: '={id}'
+  },
+  });
+  ```
+
+
 
 # Examples
 
@@ -104,7 +458,7 @@ await pgHelper.runTSql([
         sql: 'select power({a}, {b})',
         params: { a: 2, b: 4}
     }
-])
+]);
 ```
 
 OR
@@ -112,15 +466,14 @@ OR
 let transaction;
 try {
   transaction = await pgHelper.getTransaction();
-  let result4 = await pgHelper.runSql('select {str1} || {str2}', {
-    str1: 'xiao',
-    str2: 'hong',
-  }, {
+  await pgHelper.runSql('select now()', {
+    transaction,
+  });
+  await pgHelper.runSql('select power({a}, {b})', { a: 2, b: 4}, {
     transaction,
   });
   transaction.commit();
 
-  console.log(result4)
 } catch (error) {
   transaction.rollback();
 }
