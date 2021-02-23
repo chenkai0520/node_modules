@@ -1,9 +1,17 @@
 const pg = require('pg');
-const sqlUtils = require('./utils/sqlUtils');
+const sqlUtils = require('./sqlUtils');
 
 const { Pool, Client } = pg;
 const {
-  sqlTemplate, objHump2underline, rowsUnderline2hump, whereSql, orderSql, limitOffsetSql, updateSql, insertSql, includeSql, returningSql
+  sqlTemplate,
+  rowsUnderline2hump,
+  whereSql,
+  orderSql,
+  limitOffsetSql,
+  updateSql,
+  insertSql,
+  includeSql,
+  returningSql,
 } = sqlUtils;
 
 class MyClient extends Client {
@@ -11,15 +19,14 @@ class MyClient extends Client {
     const pgClient = options.transaction || this;
 
     let result;
-    if(!Array.isArray(obj)){
-      const autoHump = 'autoHump' in options ? options.autoHump : this.autoHump;
-      if(autoHump) {
-        obj = objHump2underline(obj);
-      }
+    if (!Array.isArray(obj)) {
       const { sql, values } = sqlTemplate(sqlTem, obj);
       result = await pgClient.query(sql, values);
     } else {
       result = await pgClient.query(sqlTem, obj);
+    }
+    if (!options.transaction) {
+      await pgClient.release();
     }
     return result;
   }
@@ -105,11 +112,11 @@ class PgHelper {
     try {
       await pgClient.begin();
 
-      const result = await Promise.all(sqlTemps.map((sqlTemp)=>{
-        return this.runSql(sqlTemp.sql, sqlTemp.parmas, {
+      const result = await Promise.all(
+        sqlTemps.map((sqlTemp) => this.runSql(sqlTemp.sql, sqlTemp.parmas, {
           transaction: pgClient,
-        })
-      }))
+        })),
+      );
 
       await pgClient.commit();
 
@@ -120,61 +127,60 @@ class PgHelper {
       throw err;
     } finally {
       this.logger.info(`TRANSACTION：${sqlTemps.map((item) => item.sql)}`);
+      await pgClient.release();
     }
   }
 
-  async insert(params, options){
+  async insert(params, options) {
     const { tableName } = options;
     const schemaName = 'schemaName' in options ? options.schemaName : 'public';
     const returning = 'returning' in options ? options.returning : this.returning;
-    const autoHump = 'autoHump' in options ? options.autoHump : this.autoHump;
 
-    const { sql: _sql, data} = insertSql(params, {
-      autoHump,
-    });
+    const { sql: _sql, data } = insertSql(params);
     const sql = `INSERT INTO ${schemaName}."${tableName}" ${_sql} ${returningSql(returning)}`;
-    return this.runSql(sql, data , options);
+    return this.runSql(sql, data, options);
   }
 
-  async delete(params, options){
+  async delete(params, options) {
     const { tableName, where } = options;
     const schemaName = 'schemaName' in options ? options.schemaName : 'public';
     const returning = 'returning' in options ? options.returning : this.returning;
 
     const sql = `DELETE FROM ${schemaName}."${tableName}"
     ${whereSql(where)} ${returningSql(returning)}`;
-    return this.runSql(sql, params , options);
+    return this.runSql(sql, params, options);
   }
 
-  async update(params, options){
+  async update(params, options) {
     const { update, tableName, where } = options;
     const schemaName = 'schemaName' in options ? options.schemaName : 'public';
     const returning = 'returning' in options ? options.returning : this.returning;
 
     const sql = `UPDATE ${schemaName}."${tableName}"
     SET ${updateSql(update)}
-    ${whereSql(where)} ${returningSql(returning)}`
+    ${whereSql(where)} ${returningSql(returning)}`;
     return this.runSql(sql, params, options);
   }
 
-  async select(params, options){
-    const { tableName, include, where, order, limit, offset, count } = options;
+  async select(params, options) {
+    const {
+      tableName, include, where, order, limit, offset, count,
+    } = options;
     const schemaName = 'schemaName' in options ? options.schemaName : 'public';
 
     const sql = `SELECT ${includeSql(include)}
     FROM ${schemaName}."${tableName}"
-    ${whereSql(where)} ${orderSql(order)} ${limitOffsetSql({limit, offset})} `;
+    ${whereSql(where)} ${orderSql(order)} ${limitOffsetSql({ limit, offset })} `;
     const result = await this.runSql(sql, params, options);
-    
-    if(count){
+
+    if (count) {
       const countRes = await this.runSql(`SELECT count(*) as count
         FROM ${schemaName}."${tableName}"
         ${whereSql(where)}`, params, options);
-      result.count = parseInt(countRes.rows[0].count);
+      result.count = parseInt(countRes.rows[0].count, 10);
     }
     return result;
   }
-
 }
 
 module.exports = {

@@ -1,3 +1,5 @@
+const symbolLiteral = Symbol('literal');
+
 /**
  * sqlStr: `select * from ${USERS}  where username = {username}`
  * obj: {username: 'xiaohong'}
@@ -38,12 +40,11 @@ function hump2underline(str) {
 
 function objHump2underline(obj) {
   const formatObj = {};
-  Object.keys(obj).forEach((key)=>{
+  Object.keys(obj).forEach((key) => {
     formatObj[hump2underline(key)] = obj[key];
-  })
+  });
   return formatObj;
 }
-
 
 function rowsUnderline2hump(rows) {
   if (!Array.isArray(rows) || rows.length === 0) return [];
@@ -60,7 +61,7 @@ function rowsUnderline2hump(rows) {
 
 function orderSql(orders = []) {
   return orders.map((order) => {
-    if(Array.isArray(order)) {
+    if (Array.isArray(order)) {
       const [field, type] = order;
       return `${field} ${type}`;
     }
@@ -68,133 +69,132 @@ function orderSql(orders = []) {
   }).join(',');
 }
 
-function getWhereSql(where, options) {
-  if(!where) return '';
+function getWhereSql(where, options = {}) {
+  if (!where) return '';
   const type = options.type || 'and';
-  const autoHump = options.autoHump;
 
-  const fields = Object.keys(where).filter((field) => {
-    return ['and', 'or'].indexOf(field) === -1;
-  });
-  
-  let sql = ` ( `;
-  if(fields.length > 0) {
+  const fields = Object.keys(where).filter((field) => ['and', 'or'].indexOf(field) === -1);
+
+  let sql = ' ( ';
+  if (fields.length > 0) {
     const firstField = fields[0];
 
-    if(autoHump) {
-      sql += `${hump2underline(firstField)} ${where[firstField]}`;
-      fields.shift();
-      fields.forEach((field)=>{
-        sql += ` ${type} ${hump2underline(field)} ${where[field]} `;
-      });
-    } else {
-      sql += `${firstField} ${where[firstField]}`;
-      fields.shift();
-      fields.forEach((field)=>{
-        sql += ` ${type} ${field} ${where[field]} `;
-      });
-    }
+    sql += `${firstField} ${where[firstField]}`;
+    fields.shift();
+    fields.forEach((field) => {
+      sql += ` ${type} ${field} ${where[field]} `;
+    });
   }
-  
-  if('and' in where) {
+
+  if ('and' in where) {
     sql += ` and ${getWhereSql(where.and, {
-      autoHump,
       type: 'and',
     })} `;
   }
-  if('or' in where) {
+  if ('or' in where) {
     sql += ` or ${getWhereSql(where.or, {
-      autoHump,
       type: 'or',
     })} `;
   }
 
   sql += ' ) ';
-  
+
   return sql;
 }
 
 function whereSql(where) {
-  let whereSql = getWhereSql(where);
-  if(whereSql){
-    whereSql = `where ${whereSql}`;
+  let sql = getWhereSql(where);
+  if (sql) {
+    sql = `where ${sql}`;
   }
-  return whereSql;
+  return sql;
 }
 
 function limitOffsetSql(params) {
   const { limit, offset } = params;
-  return `${Number.isInteger(limit) ? ` limit ${limit} `:''} ${Number.isInteger(offset) ? ` offset ${offset} `:''}`;
+  return `${Number.isInteger(limit) ? ` limit ${limit} ` : ''} ${Number.isInteger(offset) ? ` offset ${offset} ` : ''}`;
 }
 
 function includeSql(params) {
-  if(!params || !Array.isArray(params)) {
+  if (!params || !Array.isArray(params)) {
     return '*';
   }
 
   return params.map((param) => {
-    if(Array.isArray(param)) {
+    if (Array.isArray(param)) {
       const [field, aliax, type] = param;
-      return ` ${field} ${aliax ? `as ${aliax}`:''} ${type ? ` :: ${type}`:''}`;
+      return ` ${field} ${aliax ? `as ${aliax}` : ''} ${type ? ` :: ${type}` : ''}`;
     }
     return `${param}`;
   }).join(',');
 }
 
 function updateSql(params = {}) {
-  if(Array.isArray(params)) {
+  if (Array.isArray(params)) {
     return params.map((field) => `${field}={${field}}`).join(',');
-  } else {
-    const fields = Object.keys(params);
-    return fields.filter((field) => params[field] !== undefined).map((field) => `${field} = ${params[field]}`).join(',');
   }
+  const fields = Object.keys(params);
+  return fields.filter((field) => params[field] !== undefined)
+    .map((field) => {
+      if (typeof params[field] === 'object' && symbolLiteral in params[field]) {
+        return `${field} = ${params[field][symbolLiteral]}`;
+      }
+      return `${field}={${field}}`;
+    }).join(',');
 }
 
 function fieldsSql(params) {
   return params.join(',');
 }
 
-function insertSql(params, options) {
-  let fieldsSql = ' ( ';
+function insertSql(params) {
+  let fieldSql = ' ( ';
   let valuesSql = ' VALUES ';
   const data = [];
-  const autoHump = options.autoHump;
   if (!Array.isArray(params)) {
     params = [params];
   }
 
   const fields = Object.keys(params[0]);
 
-  if(autoHump) {
-    fieldsSql += fields.map((field) => objHump2underline(field)).join(',');
-  } else {
-    fieldsSql += fields.join(',');
-  }
-  fieldsSql +=')';
+  fieldSql += fields.join(',');
+
+  fieldSql += ')';
 
   const fieldCount = fields.length;
-  valuesSql += params.map((param, index)=>{
+  let ignoreCount = 0;
+  valuesSql += params.map((param, index) => {
     let valueSql = '(';
-    const fields = Object.keys(param);
-    valueSql += fields.map((value, valueIndex )=>{
+    const paramFields = Object.keys(param);
+    valueSql += paramFields.map((value, valueIndex) => {
+      if (typeof param[value] === 'object' && symbolLiteral in param[value]) {
+        ignoreCount += 1;
+        return param[value][symbolLiteral];
+      }
       data.push(param[value]);
-      return `$${index * fieldCount + valueIndex + 1}`
+      return `$${index * fieldCount + valueIndex + 1 - ignoreCount}`;
     }).join(',');
     valueSql += ')';
     return valueSql;
   }).join(',');
   return {
-    sql: fieldsSql + valuesSql,
+    sql: fieldSql + valuesSql,
     data,
   };
 }
 
 function returningSql(returning) {
-  if(!Array.isArray(returning)) {
+  if (!Array.isArray(returning)) {
     return returning ? ' returning * ' : '';
   }
-  
+
   return ` returning ${returning.join(',')} `;
+}
+
+function literalSql(sql) {
+  return {
+    [symbolLiteral]: sql,
+  };
 }
 
 module.exports = {
@@ -209,4 +209,5 @@ module.exports = {
   insertSql,
   fieldsSql,
   returningSql,
+  literalSql,
 };

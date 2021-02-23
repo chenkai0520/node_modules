@@ -20,17 +20,6 @@ const pgHelper = new PgHelper({
 });
 ```
 
-## Examples Run sql
-
-```js
-await pgHelper.runSql('select now()');
-```
-
-## with params
-```js
-await pgHelper.runSql('select power({a}, {b})', { a: 2, b: 4 });
-```
-
 ## insert
 
 ```js
@@ -94,8 +83,17 @@ const result = await pgHelper.select({
 });
 ```
 
+## Run sql
 
-## Examples Run transaction sql
+```js
+await pgHelper.runSql('select now()');
+
+// with params
+await pgHelper.runSql('select power({a}, {b})', { a: 2, b: 4 });
+```
+
+
+## Run sql use transaction
 
 ```js
 await pgHelper.runTSql([
@@ -109,7 +107,7 @@ await pgHelper.runTSql([
 ])
 ```
 
-or 
+OR
 ```js
 let transaction;
 try {
@@ -127,6 +125,3 @@ try {
   transaction.rollback();
 }
 ```
-
-
-
