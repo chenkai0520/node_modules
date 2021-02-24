@@ -98,7 +98,7 @@ select
 /**
 SQL: SELECT  * 
     FROM "public"."users"
-     where  (  "username" ={username}  and "id" >0  or  (  "email" ={email}  )   )     ;
+    where  (  "username" ={username}  and "id" >0  or  (  "email" ={email}  )   )     ;
 values: {"username":"jack","email":"demo@test.com"}
 **/
 const result = await pgHelper.select({
@@ -130,10 +130,10 @@ await pgHelper.runTSql([
        params: {"username":"jack","email":"jack@test.com"},
     },
     {
-        sql: `UPDATE "public"."users"
-    					SET  "email" = {email} 
-     					where  (  "username" ={username}  ) `,
-        params: {"username":"jack","email":"jack@test.com"}
+      sql: `UPDATE "public"."users"
+    				SET  "email" = {email} 
+     				where  (  "username" ={username}  ) `,
+      params: {"username":"jack","email":"jack@test.com"}
     }
 ]);
 
@@ -211,8 +211,8 @@ Function
 + params `Array<Object>` - 插入表的数据，其中`Object`的key需要和数据表中的字段一一对应
 + options
   + options.autoHump `Boolean` - 如果`autoHump`为true返回字段的名称会格式化为驼峰
-  + options.tableName`String`- 表名称
-  + options.schemaName`String`- 表名称;default: `public`
+  + options.tableName`String` - 表名称
+  + options.schemaName`String` - 表名称;default: `public`
   + options.returning `Boolean｜Array` - 如果`returning`为true,返回结果会包含插入的数据，为数组时返回数组包含的字段
 
 #### return
@@ -233,13 +233,13 @@ Function
 
   + options.autoHump `Boolean` - 如果`autoHump`为true返回字段的名称会格式化为驼峰
 
-  + options.tableName`String`- 表名称
+  + options.tableName`String` - 表名称
 
-  + options.schemaName`String`- 表名称;default: `public`
+  + options.schemaName`String` - 表名称;default: `public`
 
   + options.returning `Boolean｜Array` - 如果`returning`为true,返回结果会包含删除的数据，为数组时返回数组包含的字段
 
-  + options.where`Object`  构建where sql ,你可以使用`and`、`or`嵌套
+  + options.where`Object` - 构建where sql ,你可以使用`and`、`or`嵌套
   
     ```js
     {
@@ -273,13 +273,13 @@ Function
 
   + options.autoHump `Boolean` - 如果`autoHump`为true返回字段的名称会格式化为驼峰
 
-  + options.tableName`String`- 表名称
+  + options.tableName`String` - 表名称
 
-  + options.schemaName`String`- 表名称;default: `public`
+  + options.schemaName`String` - 表名称;default: `public`
 
   + options.returning `Boolean｜Array` - 如果`returning`为true,返回结果会包含更新的数据，为数组时返回数组包含的字段
 
-  + options.where`Object`  构建where sql ,你可以使用`and`、`or`嵌套
+  + options.where`Object` - 构建where sql ,你可以使用`and`、`or`嵌套
   
   + options. update`Array|Object` - 需要更新的字段
   
@@ -450,65 +450,54 @@ sqlUtils
 
 + str `String` - 构造某些特殊SQL很有用 ，返回的sql不会在被当作模版中对key
 
-  ```js
-  const {sqlUtils} = require('@c_kai/pg-helper');
-  /**
+```js
+/**
 SQL: UPDATE "public"."users"
-       SET  "email" = {username}||'email.com' ,  "updated_at" = now() 
-       where  (  "username" ={username}  )   ;
-  values: {"username":"jack"}
-  **/
-  const result = await pgHelper.update({
-    username: 'jack',
-  }, {
-    update: {
-      email: sqlUtils.literalSql("{username}||'email.com'"),
-      updated_at: sqlUtils.literalSql('now()')
-    },
+     SET  "email" = {username}||'email.com' ,  "updated_at" = now() 
+     where  (  "username" ={username}  )   ;
+values: {"username":"jack"}
+**/
+const {sqlUtils} = require('@c_kai/pg-helper');
+
+const result = await pgHelper.update({
+  username: 'jack',
+}, {
+  update: {
+    email: sqlUtils.literalSql("{username}||'email.com'"),
+    updated_at: sqlUtils.literalSql('now()')
+  },
   tableName: 'users',
-    where: {
-      username: '={username}'
-    }
-  });
-  ```
-
-
+  where: {
+    username: '={username}'
+  }
+});
+```
 
 ### sqlUtils.updateSql(update)
-
 
 
 ### sqlUtils.insertSql(rows)
 
 
-
 ### sqlUtils.orderSql(order)
-
 
 
 ### sqlUtils.includeSql(include)
 
 
-
 ### sqlUtils.whereSql(where)
-
 
 
 ### sqlUtils.returningSql(returning)
 
 
-
 ### sqlUtils.fieldsSql(fields)
-
 
 
 ### sqlUtils.limitOffsetSql(option)
 
 
-
 ### sqlUtils.sqlTemplate(str, obj)
 
 
-
 ### sqlUtils.rowsUnderline2hump(rows)
-
