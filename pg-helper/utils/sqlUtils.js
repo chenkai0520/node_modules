@@ -70,7 +70,7 @@ function orderSql(orders = []) {
 }
 
 function getWhereSql(where, options = {}) {
-  if (!where) return '';
+  if (!where || Object.keys(where).length === 0) return '';
   const type = options.type || 'and';
 
   const fields = Object.keys(where).filter((field) => ['and', 'or'].indexOf(field) === -1);

@@ -12,18 +12,19 @@ A small helper for node-postgres to help you with building your queries.
 ```
 ## Featrues
 
-+ 你可以使用`pgHelper.runSql` 函数
++ 无需明确的顺序的参数化查询, sql中`{}`包括的参数会被对象中的对应值替换，你可以将`{}`模版用到任何需要参数的地方,最终执行时它都会被替换成`$n`的形式
 
 ```js
-pgHelper.runSql('SELECT * FROM table WHERE field1 = {field1} AND field2 = {field2}', {field1, field2});
 
-//当然你仍然可以使用
-pgHelper.runSql('SELECT * FROM table WHERE field1 = $1 AND field2 = $2', [field1, field2]);
+pgHelper.runSql('SELECT * FROM ${tablename} WHERE field1 = {field1} AND field2 = {field2}', {field1, field2});
+
+//当然你仍然可以使用，这两种查询方式是等效的
+pgHelper.runSql('SELECT * FROM ${tablename} WHERE field1 = $1 AND field2 = $2', [field1, field2]);
 ```
 
-+ 该模块还提供了`select`、`update`、`delete`、`insert` 等函数方便对单表进行CURD；
++ 提供了`select`、`update`、`delete`、`insert` 等函数方便对单表进行CURD
 
-+ 该模块封装了对事务的操作
++ 封装了对事务的操作
 
 ```js
 await pgHelper.runTSql([
@@ -164,7 +165,7 @@ Function
     	name: 'name',
     	type: 'myType',
     }
-    name = {name},type={myType}
+    //name = {name},type={myType}
     
     ```
 
@@ -321,26 +322,27 @@ sqlUtils
 
 #### params 
 
-+ str `String` - 对应某些特殊SQL很有用 ，返回的sql不回在被模版转义,如
++ str `String` - 对应某些特殊SQL很有用 ，返回的sql不会在被当作模版中对key,如
 
   ```js
-  await model.jobs.update({
-  	percentage,
-  	status: 'progress',
+  // sql
+  // update jobs set updated_at = (now() :: date) where id = {id}
+
+  await model.update({
+  	id,
   }, {
-  	update: [{
-  		field: 'percentage',
-  		value: `(
-          CASE WHEN percentage < {percentage} 
-          THEN  {percentage}
-          ELSE percentage END)`,
-  	}, 'status'],
+    table: 'jobs',
+  	update: {
+      updated_at: '(now() :: date)',
+    },
   	where: {
   	id: '={id}'
   },
   });
+
+  // will return error sql
+  // update jobs set updated_at = {(now() :: date)}  where id = {id}
   
-  //OR
   
   await model.jobs.update({
   	percentage,
@@ -348,15 +350,15 @@ sqlUtils
   }, {
   	update: {
   		status: 'status',
-  		percentage: sqlUtils.literalSql(`(
-          CASE WHEN percentage < {percentage} 
-          THEN  {percentage}
-          ELSE percentage END)`),
+  		percentage: sqlUtils.literalSql(`now()`),
   	},
   	where: {
   	id: '={id}'
   },
   });
+
+  // will return error sql
+  // update jobs set updated_at = (now() :: date) where id = {id}
   ```
 
 
