@@ -30,6 +30,10 @@ function sqlTemplate(sqlTemp, obj) {
   };
 }
 
+function fieldsSql(params) {
+  return ` "${params.join('", "')}" `;
+}
+
 function underline2hump(str) {
   return str.replace(/_([a-z])/g, (match, p1) => p1.toUpperCase());
 }
@@ -63,10 +67,10 @@ function orderSql(orders = []) {
   return orders.map((order) => {
     if (Array.isArray(order)) {
       const [field, type] = order;
-      return `${field} ${type}`;
+      return ` "${field}" ${type} `;
     }
-    return `${order}`;
-  }).join(',');
+    return ` "${order}" `;
+  }).join(', ');
 }
 
 function getWhereSql(where, options = {}) {
@@ -79,22 +83,18 @@ function getWhereSql(where, options = {}) {
   if (fields.length > 0) {
     const firstField = fields[0];
 
-    sql += `${firstField} ${where[firstField]}`;
+    sql += ` "${firstField}" ${where[firstField]} `;
     fields.shift();
     fields.forEach((field) => {
-      sql += ` ${type} ${field} ${where[field]} `;
+      sql += ` ${type} "${field}" ${where[field]} `;
     });
   }
 
   if ('and' in where) {
-    sql += ` and ${getWhereSql(where.and, {
-      type: 'and',
-    })} `;
+    sql += ` and ${getWhereSql(where.and, { type: 'and' })} `;
   }
   if ('or' in where) {
-    sql += ` or ${getWhereSql(where.or, {
-      type: 'or',
-    })} `;
+    sql += ` or ${getWhereSql(where.or, { type: 'or'})} `;
   }
 
   sql += ' ) ';
@@ -105,7 +105,7 @@ function getWhereSql(where, options = {}) {
 function whereSql(where) {
   let sql = getWhereSql(where);
   if (sql) {
-    sql = `where ${sql}`;
+    sql = ` where ${sql} `;
   }
   return sql;
 }
@@ -118,28 +118,28 @@ function limitOffsetSql(params) {
   }
 
   if(Number.isInteger(offset)) {
-    return `limit ${limit} offset ${offset}`;
+    return ` limit ${limit} offset ${offset} `;
   }
 
   if(Number.isInteger(page)) {
-    return `limit ${limit} offset ${(page - 1) * limit}`;
+    return ` limit ${limit} offset ${(page - 1) * limit} `;
   }
 
-  return `limit ${limit}`;
+  return ` limit ${limit} `;
 }
 
 function includeSql(params) {
   if (!params || !Array.isArray(params)) {
-    return '*';
+    return ' * ';
   }
 
   return params.map((param) => {
     if (Array.isArray(param)) {
       const [field, aliax, type] = param;
-      return ` ${field} ${aliax ? `as ${aliax}` : ''} ${type ? ` :: ${type}` : ''}`;
+      return ` "${field}" ${type ? ` :: ${type} ` : ''} ${aliax ? ` as "${aliax}" ` : ''}`;
     }
-    return `${param}`;
-  }).join(',');
+    return ` "${param}" `;
+  }).join(', ');
 }
 
 function updateSql(params = {}) {
@@ -147,24 +147,21 @@ function updateSql(params = {}) {
     return params.map((field) => {
       if (typeof field === 'object' && field.value) {
         const fieldValue = typeof field.value === 'string' ? field.value : field.value[symbolLiteral];
-        return `${field.field} = ${fieldValue}`;
+        return ` "${field.field}" = ${fieldValue} `;
       }
-      return `${field}={${field}}`;
-    }).join(',');
+      return ` "${field}" = {${field}} `;
+    }).join(', ');
   }
   const fields = Object.keys(params);
   return fields.filter((field) => params[field] !== undefined)
     .map((field) => {
       if (typeof params[field] === 'object' && symbolLiteral in params[field]) {
-        return `${field} = ${params[field][symbolLiteral]}`;
+        return ` "${field}" = ${params[field][symbolLiteral]} `;
       }
-      return `${field}={${field}}`;
-    }).join(',');
+      return ` "${field}" = {${field}} `;
+    }).join(', ');
 }
 
-function fieldsSql(params) {
-  return params.join(',');
-}
 
 function insertSql(params) {
   let fieldSql = ' ( ';
@@ -176,14 +173,14 @@ function insertSql(params) {
 
   const fields = Object.keys(params[0]);
 
-  fieldSql += fields.join(',');
+  fieldSql += fieldsSql(fields);
 
-  fieldSql += ')';
+  fieldSql += ' ) ';
 
   const fieldCount = fields.length;
   let ignoreCount = 0;
   valuesSql += params.map((param, index) => {
-    let valueSql = '(';
+    let valueSql = ' ( ';
     const paramFields = Object.keys(param);
     valueSql += paramFields.map((value, valueIndex) => {
       if (typeof param[value] === 'object' && symbolLiteral in param[value]) {
@@ -192,10 +189,10 @@ function insertSql(params) {
       }
       data.push(param[value]);
       return `$${index * fieldCount + valueIndex + 1 - ignoreCount}`;
-    }).join(',');
-    valueSql += ')';
+    }).join(', ');
+    valueSql += ' ) ';
     return valueSql;
-  }).join(',');
+  }).join(', ');
   return {
     sql: fieldSql + valuesSql,
     data,
@@ -207,7 +204,7 @@ function returningSql(returning) {
     return returning ? ' returning * ' : '';
   }
 
-  return ` returning ${returning.join(',')} `;
+  return ` returning ${fieldsSql(returning)} `;
 }
 
 function literalSql(sql) {
@@ -218,6 +215,7 @@ function literalSql(sql) {
 
 module.exports = {
   sqlTemplate,
+  fieldsSql,
   rowsUnderline2hump,
   objHump2underline,
   orderSql,
@@ -226,7 +224,6 @@ module.exports = {
   includeSql,
   updateSql,
   insertSql,
-  fieldsSql,
   returningSql,
   literalSql,
 };

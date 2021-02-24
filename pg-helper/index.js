@@ -137,7 +137,7 @@ class PgHelper {
     const returning = 'returning' in options ? options.returning : this.returning;
 
     const { sql: _sql, data } = insertSql(params);
-    const sql = `INSERT INTO ${schemaName}."${tableName}" ${_sql} ${returningSql(returning)}`;
+    const sql = `INSERT INTO "${schemaName}"."${tableName}" ${_sql} ${returningSql(returning)}`;
     return this.runSql(sql, data, options);
   }
 
@@ -146,7 +146,7 @@ class PgHelper {
     const schemaName = 'schemaName' in options ? options.schemaName : 'public';
     const returning = 'returning' in options ? options.returning : this.returning;
 
-    const sql = `DELETE FROM ${schemaName}."${tableName}"
+    const sql = `DELETE FROM "${schemaName}"."${tableName}"
     ${whereSql(where)} ${returningSql(returning)}`;
     return this.runSql(sql, params, options);
   }
@@ -156,7 +156,7 @@ class PgHelper {
     const schemaName = 'schemaName' in options ? options.schemaName : 'public';
     const returning = 'returning' in options ? options.returning : this.returning;
 
-    const sql = `UPDATE ${schemaName}."${tableName}"
+    const sql = `UPDATE "${schemaName}"."${tableName}"
     SET ${updateSql(update)}
     ${whereSql(where)} ${returningSql(returning)}`;
     return this.runSql(sql, params, options);
@@ -169,13 +169,13 @@ class PgHelper {
     const schemaName = 'schemaName' in options ? options.schemaName : 'public';
 
     const sql = `SELECT ${includeSql(include)}
-    FROM ${schemaName}."${tableName}"
+    FROM "${schemaName}"."${tableName}"
     ${whereSql(where)} ${orderSql(order)} ${limitOffsetSql({ limit, offset, page })} `;
     const result = await this.runSql(sql, params, options);
 
     if (count) {
       const countRes = await this.runSql(`SELECT count(*) as count
-        FROM ${schemaName}."${tableName}"
+        FROM "${schemaName}"."${tableName}"
         ${whereSql(where)}`, params, options);
       result.count = parseInt(countRes.rows[0].count, 10);
     }

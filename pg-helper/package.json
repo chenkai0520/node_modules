@@ -1,7 +1,7 @@
 {
   "name": "@c_kai/pg-helper",
-  "version": "1.1.5",
-  "description": "pg helper utils",
+  "version": "1.1.6",
+  "description": "A small helper of node-postgres can help you build queries more easily and safely",
   "main": "index.js",
   "repository": "https://github.com/chenkai0520/node_modules/tree/main/pg-helper",
   "author": "chenkai0520",
@@ -10,6 +10,8 @@
     "database",
     "pg-utils",
     "pg-helper",
+    "sql-utils",
+    "sql-helper",
     "pg",
     "postgre",
     "postgres",
