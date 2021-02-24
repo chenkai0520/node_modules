@@ -13,6 +13,22 @@ models
 └── user.js
 ```
 
+/models/user.js
+```js
+function user (sequlize) {
+  sequelize.define('modelName', {
+    columnA: {
+        type: Sequelize.BOOLEAN,
+        field: 'column_a'
+    },
+    columnB: Sequelize.STRING,
+    columnC: 'MY VERY OWN COLUMN TYPE'
+  });
+}
+
+modules.exports = user;
+```
+
 ```javascript
 const path = require('path');
 const { Sequelize } = require('sequelize');
@@ -26,7 +42,7 @@ console.log(sequelize.models);
 //{ data: data, table1: table1, table2: table2, user: user }
 
 //now you can make the standard CRUD queries
-console.log(sequelize.models.table1.create;
+console.log(sequelize.models.user.create;
 // detail: https://sequelize.org/master/manual/model-querying-basics.html
 ```
 

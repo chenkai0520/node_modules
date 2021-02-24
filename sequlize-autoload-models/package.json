@@ -1,6 +1,6 @@
 {
   "name": "@c_kai/sequlize-autoload-models",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "sequlize autoload models",
   "main": "index.js",
   "repository": "https://github.com/chenkai0520/node_modules/tree/main/sequlize-autoload-models",
