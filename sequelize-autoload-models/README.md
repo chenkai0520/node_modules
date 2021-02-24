@@ -1,5 +1,5 @@
-# sequlize-autoload-models
-sequlize-autoload-models
+# sequelize-autoload
+sequelize-autoload
 
 # example
 models
@@ -15,7 +15,7 @@ models
 
 /models/user.js
 ```js
-function user (sequlize) {
+function user (sequelize) {
   sequelize.define('modelName', {
     columnA: {
         type: Sequelize.BOOLEAN,
@@ -32,7 +32,7 @@ modules.exports = user;
 ```javascript
 const path = require('path');
 const { Sequelize } = require('sequelize');
-const autoloadModels = require('@c_kai/sequlize-autoload-models');
+const autoloadModels = require('@c_kai/sequelize-autoload');
 
 
 let sequelize = new Sequelize('postgres://postgres:postgres@localhost:5432/dbname');
