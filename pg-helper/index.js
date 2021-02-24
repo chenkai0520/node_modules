@@ -164,13 +164,13 @@ class PgHelper {
 
   async select(params, options) {
     const {
-      tableName, include, where, order, limit, offset, count,
+      tableName, include, where, order, limit, offset, count, page,
     } = options;
     const schemaName = 'schemaName' in options ? options.schemaName : 'public';
 
     const sql = `SELECT ${includeSql(include)}
     FROM ${schemaName}."${tableName}"
-    ${whereSql(where)} ${orderSql(order)} ${limitOffsetSql({ limit, offset })} `;
+    ${whereSql(where)} ${orderSql(order)} ${limitOffsetSql({ limit, offset, page })} `;
     const result = await this.runSql(sql, params, options);
 
     if (count) {

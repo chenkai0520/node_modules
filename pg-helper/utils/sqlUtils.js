@@ -111,8 +111,21 @@ function whereSql(where) {
 }
 
 function limitOffsetSql(params) {
-  const { limit, offset } = params;
-  return `${Number.isInteger(limit) ? ` limit ${limit} ` : ''} ${Number.isInteger(offset) ? ` offset ${offset} ` : ''}`;
+  const { limit, offset, page } = params;
+
+  if(!Number.isInteger(limit)){
+    return '';
+  }
+
+  if(Number.isInteger(offset)) {
+    return `limit ${limit} offset ${offset}`;
+  }
+
+  if(Number.isInteger(page)) {
+    return `limit ${limit} offset ${(page - 1) * limit}`;
+  }
+
+  return `limit ${limit}`;
 }
 
 function includeSql(params) {
