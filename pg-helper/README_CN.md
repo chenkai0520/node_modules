@@ -250,13 +250,9 @@ Function
         name: '={name}'
     	}
     }
-    
-    ```
-  
-  // sql
+      
+    // sql
     //where (id > 0 and type={type} or (id = any({ids} or name ={name} ) )
-    ```
-  
     ```
 
 #### return
@@ -295,15 +291,10 @@ Function
     //name = {name},type={myType}
      
     ['name', { field: 'type', updated_at: 'now()'}]
-  // name = {name},updated_at=now()
+    // name = {name},updated_at=now()
     
-    ```
-  
-  { 'name',updated_at: sqlUtils.literalSql('now()') }
-    // name = {name}, updated_at = now()
-  
-    ```
-  
+    { 'name',updated_at: sqlUtils.literalSql('now()') }
+    // name = {name}, updated_at = now()  
     ```
 
 #### return
